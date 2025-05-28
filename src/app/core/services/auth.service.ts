@@ -10,7 +10,7 @@ import { AuthResponse, LoginRequest, RefreshTokenRequest, RegisterRequest, User 
 })
 export class AuthService {
   // API URL - Using relative path for proxy
-  private API_URL = '/api';
+  private API_URL = 'http://127.0.0.1:8000/api';
   
   // HTTP Options to handle CORS
   private httpOptions = {
@@ -18,7 +18,7 @@ export class AuthService {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     }),
-    withCredentials: false // Set to true if your API requires cookies/credentials
+    withCredentials: true // Set to true if your API requires cookies/credentials
   };
   private readonly TOKEN_KEY = 'pcloud_auth_token';
   private readonly REFRESH_TOKEN_KEY = 'pcloud_refresh_token';
@@ -111,7 +111,7 @@ export class AuthService {
   }
 
   public login(credentials: LoginRequest): Observable<AuthResponse> {
-    console.log('Logging in user:', credentials.username);
+    console.log('Logging in user:', credentials);
     // Simplify the login flow to debug the issue
     return this.http.post<AuthResponse>(`${this.API_URL}/account/token/`, credentials, this.httpOptions)
       .pipe(
