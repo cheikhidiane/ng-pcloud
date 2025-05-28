@@ -1,1 +1,72 @@
 /* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom pCloud styling */
+:root {
+  --pcloud-primary: #3B82F6;
+  --pcloud-secondary: #10B981;
+  --pcloud-background-light: #F3F4F6;
+  --pcloud-background-dark: #1F2937;
+  --pcloud-text-light: #111827;
+  --pcloud-text-dark: #F9FAFB;
+}
+
+body {
+  @apply font-sans antialiased;
+  @apply bg-gray-50 text-gray-900;
+  @apply dark:bg-gray-900 dark:text-gray-100;
+  transition: background-color 0.3s ease;
+}
+
+/* Component styles */
+@layer components {
+  .pcloud-btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .pcloud-btn-primary {
+    @apply pcloud-btn bg-pcloud-primary text-white;
+    @apply hover:bg-blue-600 focus:ring-blue-500;
+  }
+  
+  .pcloud-btn-secondary {
+    @apply pcloud-btn bg-pcloud-secondary text-white;
+    @apply hover:bg-green-600 focus:ring-green-500;
+  }
+  
+  .pcloud-btn-outline {
+    @apply pcloud-btn border border-gray-300 bg-white text-gray-700;
+    @apply hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700;
+    @apply dark:hover:bg-gray-700;
+  }
+  
+  .pcloud-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm;
+    @apply border border-gray-200 dark:border-gray-700;
+  }
+  
+  .pcloud-input {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-md;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+    @apply dark:bg-gray-700 dark:border-gray-600 dark:text-white;
+  }
+}
+
+/* Animation classes */
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
+}

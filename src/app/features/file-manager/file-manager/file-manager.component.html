@@ -1,0 +1,159 @@
+<div class="p-6 animate-fade-in">
+  <!-- Header with breadcrumbs and actions -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">My Files</h1>
+      <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <button 
+          (click)="loadFiles('root')" 
+          class="hover:text-blue-600 dark:hover:text-blue-400"
+        >
+          Home
+        </button>
+        <span *ngIf="currentFolder" class="mx-2">/</span>
+        <span *ngIf="currentFolder" class="font-medium">{{ currentFolder.name }}</span>
+      </div>
+    </div>
+    
+    <div class="flex space-x-2">
+      <button 
+        (click)="createNewFolder()" 
+        class="pcloud-btn-outline flex items-center text-sm px-3 py-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        New Folder
+      </button>
+      
+      <input 
+        type="file" 
+        #fileInput 
+        class="hidden" 
+        (change)="uploadFile($event)"
+      >
+      
+      <button 
+        (click)="fileInput.click()" 
+        class="pcloud-btn-primary flex items-center text-sm px-3 py-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        Upload
+      </button>
+    </div>
+  </div>
+  
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+  
+  <!-- Error state -->
+  <div *ngIf="error" class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-md mb-6">
+    {{ error }}
+    <button 
+      (click)="loadFiles(currentFolder?.id || 'root')" 
+      class="underline ml-2"
+    >
+      Try again
+    </button>
+  </div>
+  
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && !error && folders.length === 0 && files.length === 0" class="text-center py-12">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+    </svg>
+    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No files or folders</h3>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a folder or uploading a file.</p>
+  </div>
+  
+  <!-- Content -->
+  <div *ngIf="!isLoading && !error && (folders.length > 0 || files.length > 0)" class="space-y-6">
+    <!-- Folders section -->
+    <div *ngIf="folders.length > 0" class="space-y-4">
+      <h2 class="text-lg font-medium text-gray-900 dark:text-white">Folders</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div 
+          *ngFor="let folder of folders" 
+          class="pcloud-card p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        >
+          <div class="flex items-center overflow-hidden" (click)="navigateToFolder(folder)">
+            <div class="rounded-full bg-blue-100 dark:bg-blue-900 p-2 mr-3 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+            </div>
+            <div class="overflow-hidden">
+              <p class="font-medium text-gray-900 dark:text-white truncate">{{ folder.name }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ folder.created_at | date }}</p>
+            </div>
+          </div>
+          
+          <div class="flex space-x-2">
+            <button 
+              (click)="deleteItem(folder, false); $event.stopPropagation()" 
+              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
+              title="Delete Folder"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Files section -->
+    <div *ngIf="files.length > 0" class="space-y-4">
+      <h2 class="text-lg font-medium text-gray-900 dark:text-white">Files</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div 
+          *ngFor="let file of files" 
+          class="pcloud-card p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        >
+          <div class="flex items-center overflow-hidden">
+            <div class="rounded-full bg-green-100 dark:bg-green-900 p-2 mr-3 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div class="overflow-hidden">
+              <p class="font-medium text-gray-900 dark:text-white truncate">{{ file.name }}</p>
+              <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                <span>{{ file.size | number }} bytes</span>
+                <span class="mx-1">•</span>
+                <span>{{ file.lastModified | date }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex space-x-2">
+            <button 
+              (click)="downloadFile(file); $event.stopPropagation()" 
+              class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
+              title="Download"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
+            
+            <button 
+              (click)="deleteItem(file, true); $event.stopPropagation()" 
+              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
+              title="Delete"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

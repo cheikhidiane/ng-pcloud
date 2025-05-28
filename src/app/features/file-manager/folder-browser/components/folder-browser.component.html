@@ -1,0 +1,295 @@
+<div class="folder-browser">
+  <!-- Breadcrumbs -->
+  <div class="breadcrumbs">
+    <div class="breadcrumb-items">
+      <div 
+        *ngFor="let crumb of breadcrumbs; let i = index" 
+        class="breadcrumb-item"
+        [class.active]="i === breadcrumbs.length - 1"
+        (click)="navigateToBreadcrumb(i)"
+      >
+        <span>{{ crumb.name }}</span>
+        <svg *ngIf="i < breadcrumbs.length - 1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="toolbar-btn" (click)="createNewFolder()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          <line x1="12" y1="11" x2="12" y2="17"></line>
+          <line x1="9" y1="14" x2="15" y2="14"></line>
+        </svg>
+        <span>New Folder</span>
+      </button>
+      <button class="toolbar-btn" (click)="toggleUploadModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <span>Upload</span>
+      </button>
+      <button class="toolbar-btn" [disabled]="selectedItems.size === 0" (click)="deleteSelected()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        <span>Delete</span>
+      </button>
+    </div>
+    <div class="toolbar-right">
+      <button class="toolbar-btn" (click)="selectAll()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 11 12 14 22 4"></polyline>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+        </svg>
+        <span>Select All</span>
+      </button>
+      <button class="toolbar-btn" (click)="toggleViewMode()">
+        <svg *ngIf="viewMode === 'grid'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <svg *ngIf="viewMode === 'list'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>{{ viewMode === 'grid' ? 'List View' : 'Grid View' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Error message -->
+  <div class="error-container" *ngIf="error">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="loadFolderContents(currentFolderId)">Retry</button>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-container" *ngIf="!isLoading && !error && folders.length === 0 && files.length === 0">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <h3>This folder is empty</h3>
+    <p>Upload files or create folders to get started</p>
+    <div class="empty-actions">
+      <button class="action-btn" (click)="createNewFolder()">New Folder</button>
+      <button class="action-btn primary" (click)="toggleUploadModal()">Upload Files</button>
+    </div>
+  </div>
+
+  <!-- File/Folder List View -->
+  <div class="content-list" *ngIf="!isLoading && !error && (folders.length > 0 || files.length > 0) && viewMode === 'list'">
+    <table>
+      <thead>
+        <tr>
+          <th class="checkbox-cell">
+            <div class="checkbox" (click)="selectAll()">
+              <svg *ngIf="selectedItems.size === folders.length + files.length && folders.length + files.length > 0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+            </div>
+          </th>
+          <th class="name-cell" (click)="sortItems('name')">
+            Name
+            <svg *ngIf="sortField === 'name'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline *ngIf="sortDirection === 'asc'" points="18 15 12 9 6 15"></polyline>
+              <polyline *ngIf="sortDirection === 'desc'" points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </th>
+          <th class="modified-cell" (click)="sortItems('lastModified')">
+            Modified
+            <svg *ngIf="sortField === 'lastModified'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline *ngIf="sortDirection === 'asc'" points="18 15 12 9 6 15"></polyline>
+              <polyline *ngIf="sortDirection === 'desc'" points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </th>
+          <th class="size-cell" (click)="sortItems('size')">
+            Size
+            <svg *ngIf="sortField === 'size'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline *ngIf="sortDirection === 'asc'" points="18 15 12 9 6 15"></polyline>
+              <polyline *ngIf="sortDirection === 'desc'" points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </th>
+          <th class="actions-cell">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Folders -->
+        <tr *ngFor="let folder of folders" class="folder-row" (click)="navigateToFolder(folder.id)">
+          <td class="checkbox-cell" (click)="toggleItemSelection(folder.id, $event)">
+            <div class="checkbox" [class.checked]="isSelected(folder.id)">
+              <svg *ngIf="isSelected(folder.id)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+            </div>
+          </td>
+          <td class="name-cell">
+            <div class="item-icon folder">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            {{ folder.name }}
+          </td>
+          <td class="modified-cell">{{ folder.modified_at | date:'medium' }}</td>
+          <td class="size-cell">-</td>
+          <td class="actions-cell">
+            <button class="action-icon" (click)="toggleItemSelection(folder.id, $event)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+                <circle cx="5" cy="12" r="1"></circle>
+              </svg>
+            </button>
+          </td>
+        </tr>
+        
+        <!-- Files -->
+        <tr *ngFor="let file of files" class="file-row">
+          <td class="checkbox-cell" (click)="toggleItemSelection(file.id, $event)">
+            <div class="checkbox" [class.checked]="isSelected(file.id)">
+              <svg *ngIf="isSelected(file.id)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+            </div>
+          </td>
+          <td class="name-cell">
+            <div class="item-icon file">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            {{ file.name }}
+          </td>
+          <td class="modified-cell">{{ file.lastModified | date:'medium' }}</td>
+          <td class="size-cell">{{ getFileSize(file.size) }}</td>
+          <td class="actions-cell">
+            <button class="action-icon" (click)="downloadFile(file, $event)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+            <button class="action-icon" (click)="toggleItemSelection(file.id, $event)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+                <circle cx="5" cy="12" r="1"></circle>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- File/Folder Grid View -->
+  <div class="content-grid" *ngIf="!isLoading && !error && (folders.length > 0 || files.length > 0) && viewMode === 'grid'">
+    <!-- Folders -->
+    <div 
+      *ngFor="let folder of folders" 
+      class="grid-item folder" 
+      [class.selected]="isSelected(folder.id)"
+      (click)="navigateToFolder(folder.id)"
+    >
+      <div class="item-selection" (click)="toggleItemSelection(folder.id, $event)">
+        <div class="checkbox" [class.checked]="isSelected(folder.id)">
+          <svg *ngIf="isSelected(folder.id)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="item-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <div class="item-name">{{ folder.name }}</div>
+      <div class="item-details">{{ folder.modified_at | date:'short' }}</div>
+    </div>
+    
+    <!-- Files -->
+    <div 
+      *ngFor="let file of files" 
+      class="grid-item file" 
+      [class.selected]="isSelected(file.id)"
+    >
+      <div class="item-selection" (click)="toggleItemSelection(file.id, $event)">
+        <div class="checkbox" [class.checked]="isSelected(file.id)">
+          <svg *ngIf="isSelected(file.id)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="item-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+      </div>
+      <div class="item-name">{{ file.name }}</div>
+      <div class="item-details">{{ getFileSize(file.size) }} • {{ file.lastModified | date:'short' }}</div>
+      <div class="item-actions">
+        <button class="action-icon" (click)="downloadFile(file, $event)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" *ngIf="showUploadModal" (click)="toggleUploadModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Upload Files</h3>
+        <button class="close-btn" (click)="toggleUploadModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <app-file-upload [currentFolderId]="currentFolderId"></app-file-upload>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn" (click)="toggleUploadModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
