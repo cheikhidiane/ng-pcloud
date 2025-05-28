@@ -1,19 +1,20 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { CommonModule, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpEventType } from '@angular/common/http';
 import { FileService } from '../../services/file.service';
 import { AuthService } from '../../services/auth.service';
+import { User } from '../../models/api.model';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, UpperCasePipe],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   @Input() isSidebarCollapsed = false;
   @Input() isDarkMode = false;
   
@@ -23,12 +24,21 @@ export class HeaderComponent {
   isUserMenuOpen = false;
   showNotifications = false;
   searchQuery = '';
+  user: User | null = null;
   
   constructor(
     private router: Router,
     private fileService: FileService,
     private authService: AuthService
   ) {}
+
+  ngOnInit(): void {
+    // Subscribe to user changes
+    this.authService.currentUser$.subscribe(user => {
+      this.user = user;
+      console.log('Current user in dashboard:', user);
+    });
+  }
   
   onToggleSidebar(): void {
     this.toggleSidebar.emit();

@@ -154,9 +154,9 @@
             aria-label="User menu"
           >
             <div class="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium shadow-sm">
-              <span>U</span>
+              <span>{{ user?.first_name?.substring(0, 1) | uppercase }}</span>
             </div>
-            <span class="hidden md:inline-block text-sm font-medium text-gray-700 dark:text-gray-300">User</span>
+            <span class="hidden md:inline-block text-sm font-medium text-gray-700 dark:text-gray-300">{{ user?.first_name?.split(' ')?.at(0) }}</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="hidden md:block h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
