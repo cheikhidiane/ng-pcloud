@@ -124,9 +124,9 @@
             <div class="overflow-hidden">
               <p class="font-medium text-gray-900 dark:text-white truncate">{{ file.name }}</p>
               <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                <span>{{ file.size | number }} bytes</span>
+                <span>{{ file.length | number }} bytes</span>
                 <span class="mx-1">•</span>
-                <span>{{ file.lastModified | date }}</span>
+                <span>{{ file.uploaded_at | date }}</span>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@
             </button>
             
             <button 
-              (click)="deleteItem(file, true); $event.stopPropagation()" 
+              (click)="deleteItem(file, true)" 
               class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
               title="Delete"
             >

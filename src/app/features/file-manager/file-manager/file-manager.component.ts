@@ -14,8 +14,8 @@ import { Subscription } from 'rxjs';
   styleUrl: './file-manager.component.scss'
 })
 export class FileManagerComponent implements OnInit, OnDestroy {
-  files: FileItem[] = [];
-  folders: FolderItem[] = [];
+  files: any[] = [];
+  folders: any[] = [];
   currentFolder: FolderItem | null = null;
   isLoading = true;
   error: string | null = null;
@@ -82,11 +82,13 @@ export class FileManagerComponent implements OnInit, OnDestroy {
     })
     .then(response => {
       console.log('Direct API test response status:', response.status);
-      console.log('Response headers:', response.headers);
+      console.log('Response headers:', response.headers); 
       return response.json();
     })
     .then(data => {
-      console.log('Direct API test data:', data);
+      var parsedData = JSON.parse(data) as { files: any[], folders: any[] };
+      this.files = parsedData["files"];
+      this.folders = parsedData["folders"];
       if (data.files && data.files.length > 0) {
         console.log(`Found ${data.files.length} files via direct API call`);
       } else {
