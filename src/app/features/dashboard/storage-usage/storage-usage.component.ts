@@ -1,11 +1,11 @@
 import { Component, Input, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import Chart from 'chart.js/auto';
 
 @Component({
   selector: 'app-storage-usage',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DecimalPipe],
   templateUrl: './storage-usage.component.html',
   styleUrls: ['./storage-usage.component.scss']
 })

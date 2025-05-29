@@ -14,7 +14,7 @@
         class="flex items-center space-x-3 focus:outline-none"
       >
         <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
-          {{ user?.first_name?.charAt(0) || user?.email?.charAt(0) || 'U' }}
+          {{ user?.first_name?.charAt(0) | uppercase }}
         </div>
         <div class="hidden md:block text-left">
           <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user?.first_name || 'User' }} {{ user?.last_name || '' }}</p>
@@ -53,7 +53,7 @@
       </div>
       <div>
         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Files</p>
-        <p class="text-2xl font-semibold text-gray-900 dark:text-white">128</p>
+        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ storageUsage.nb_files }}</p>
       </div>
     </div>
     
@@ -65,7 +65,7 @@
       </div>
       <div>
         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Documents</p>
-        <p class="text-2xl font-semibold text-gray-900 dark:text-white">64</p>
+        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ storageUsage.nb_documents }}</p>
       </div>
     </div>
     
@@ -77,19 +77,23 @@
       </div>
       <div>
         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Media Files</p>
-        <p class="text-2xl font-semibold text-gray-900 dark:text-white">42</p>
+        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ storageUsage.nb_media }}</p>
       </div>
     </div>
     
     <div class="pcloud-card p-6 flex items-center">
       <div class="rounded-full bg-red-100 dark:bg-red-900 p-3 mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
+        </svg> -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-file-earmark-binary" viewBox="0 0 16 16">
+  <path d="M7.05 11.885c0 1.415-.548 2.206-1.524 2.206C4.548 14.09 4 13.3 4 11.885c0-1.412.548-2.203 1.526-2.203.976 0 1.524.79 1.524 2.203m-1.524-1.612c-.542 0-.832.563-.832 1.612q0 .133.006.252l1.559-1.143c-.126-.474-.375-.72-.733-.72zm-.732 2.508c.126.472.372.718.732.718.54 0 .83-.563.83-1.614q0-.129-.006-.25zm6.061.624V14h-3v-.595h1.181V10.5h-.05l-1.136.747v-.688l1.19-.786h.69v3.633z"/>
+  <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+</svg>
       </div>
       <div>
-        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Trash</p>
-        <p class="text-2xl font-semibold text-gray-900 dark:text-white">0</p>
+        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Other</p>
+        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ storageUsage.nb_other }}</p>
       </div>
     </div>
   </div>

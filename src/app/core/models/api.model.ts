@@ -78,13 +78,13 @@ export interface FolderContent {
 }
 
 export interface Stats {
-  _id: string;
   user_id: number;
   storage: number;
   used_storage: number;
-  nb_file: number;
+  nb_files: number;
   nb_documents: number;
   nb_media: number;
+  nb_other: number;
   nb_shared_files: number;
 }
 

@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, UpperCasePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { StorageUsageComponent } from '../storage-usage/storage-usage.component';
 import { RecentFilesComponent } from '../recent-files/recent-files.component';
@@ -11,7 +11,7 @@ import { HttpEventType } from '@angular/common/http';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, StorageUsageComponent, RecentFilesComponent],
+  imports: [CommonModule, RouterModule, StorageUsageComponent, RecentFilesComponent, UpperCasePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -26,7 +26,11 @@ export class DashboardComponent implements OnInit {
   storageUsage = {
     used: 0, // GB
     total: 0, // GB
-    percentage: 0
+    percentage: 0,
+    nb_files: 0,
+    nb_documents: 0,
+    nb_media: 0,
+    nb_other: 0
   };
 
   recentFiles: any[] = [];
@@ -75,7 +79,11 @@ export class DashboardComponent implements OnInit {
         this.storageUsage = {
           used: parseFloat(usedGB.toFixed(2)),
           total: parseFloat(totalGB.toFixed(2)),
-          percentage: Math.round((usedGB / totalGB) * 100) || 0
+          percentage: Math.round((usedGB / totalGB) * 100) || 0,
+          nb_documents: stats.nb_documents,
+          nb_files: stats.nb_files,
+          nb_media: stats.nb_media,
+          nb_other: stats.nb_other
         };
       },
       error: (err) => {

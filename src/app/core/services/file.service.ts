@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 })
 export class FileService {
   // Using relative path for proxy to avoid CORS issues
-  private readonly API_URL = '/api';
+  private readonly API_URL = 'http://127.0.0.1:8000/api';
   
   // Pinned files functionality removed
   
@@ -34,11 +34,6 @@ export class FileService {
     // Initialization
   }
 
-  // No more mock data - using only real API data
-
-  // API Methods
-  
-  // File Operations
   public getFiles(folderId: string = 'root'): Observable<FileItem[]> {
     return this.getFolderContents(folderId).pipe(
       map(content => {
@@ -249,7 +244,7 @@ export class FileService {
   
   // Stats
   public getStats(): Observable<Stats> {
-    return this.http.get<Stats>(`${this.API_URL}/files/stats/`);
+    return this.http.get<Stats>(`${this.API_URL}/stats/`);
   }
   
   // Helper methods for folder paths
