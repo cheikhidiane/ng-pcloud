@@ -88,6 +88,13 @@ export interface Stats {
   nb_shared_files: number;
 }
 
+export interface SearchResult {
+  folders: string[];
+  files: string[];
+  total_files: number;
+  total_folders: number;
+}
+
 export interface FileUploadResponse {
   id: string;
   name: string;

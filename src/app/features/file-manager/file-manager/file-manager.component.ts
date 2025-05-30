@@ -6,12 +6,13 @@ import { FileService } from '../../../core/services/file.service';
 import { FileItem, FolderItem, mapApiFileToFileItem, mapApiFolderToFolderItem } from '../../../core/models/file.model';
 import { Subscription } from 'rxjs';
 import { File } from '../../../core/models/api.model';
-import { Folder } from '../../../core/models/api.model';
+import { SearchResult } from '../../../core/models/api.model';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-file-manager',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './file-manager.component.html',
   styleUrl: './file-manager.component.scss'
 })
@@ -21,6 +22,7 @@ export class FileManagerComponent implements OnInit, OnDestroy {
   currentFolder: FolderItem | null = null;
   isLoading = true;
   error: string | null = null;
+  searchQuery: string = '';
   
   private fileUpdateSubscription: Subscription = new Subscription();
   private routeSubscription: Subscription = new Subscription();
@@ -157,19 +159,9 @@ export class FileManagerComponent implements OnInit, OnDestroy {
         
         var parsedContent = JSON.parse(content) as { files: any[], folders: any[] };
         console.log('Parsed contentttt:', parsedContent);
-        try {
-          // if (!parsedContent.files || parsedContent.files.length === 0) {
-          //   console.log('No files returned from API, adding test files');
-          //   addTestFiles();
-          //   return;
-          // }
-          
-          // Use the mapper functions to convert API models to UI models
+        try {          
           this.files = parsedContent.files;
           this.folders = parsedContent.folders;
-          
-          console.log('Final files array:', this.files);
-          console.log('Final folders array:', this.folders);
         } catch (e) {
           console.error('Error processing file data:', e);
           this.error = 'Error processing file data. Please try again.';
@@ -342,6 +334,36 @@ export class FileManagerComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.error(`Error deleting ${itemType}:`, err);
           alert(`Failed to delete ${itemType}. Please try again.`);
+        }
+      });
+    }
+  }
+
+
+  onSearch(event: Event): void {
+    const query = (event.target as HTMLInputElement).value;
+    // Handle search functionality
+    console.log('Searching for:', query);
+    if (query.trim() === '') {
+      // If search query is empty, reload the current folder
+      const currentFolderId = this.currentFolder ? this.currentFolder.id : 'root';
+    } else {
+      // Perform search logic here
+      this.isLoading = true;
+      this.error = null;
+      
+      console.log('Searching files with query:', query);
+      this.fileService.searchFiles(query, this.currentFolder ? this.currentFolder.id : 'root').subscribe({
+        next: (results) => {
+          this.files = results.files.map(file => JSON.parse(file));
+          this.folders = results.folders.map(folder => JSON.parse(folder));
+          console.log('Search folders:', this.folders);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Error searching files:', err);
+          this.error = `Failed to search files: ${err.status} ${err.statusText || 'Unknown error'}`;
+          this.isLoading = false;
         }
       });
     }

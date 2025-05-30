@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { FileItem, FolderItem, mapApiFileToFileItem, mapApiFolderToFolderItem } from '../models/file.model';
-import { FileUploadResponse, Folder, FolderContent, FolderCreateRequest, Stats, UpdateRequest, File as ApiFile } from '../models/api.model';
+import { FileUploadResponse, Folder, FolderContent, FolderCreateRequest, Stats, UpdateRequest, File as ApiFile, SearchResult } from '../models/api.model';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -267,6 +267,10 @@ export class FileService {
 
   public selectFile(file: FileItem | null): void {
     this.selectedFileSubject.next(file);
+  }
+
+  public searchFiles(query: string, folderId: string = 'root'): Observable<SearchResult> {
+    return this.http.get<SearchResult>(`${this.API_URL}/search/?q=${encodeURIComponent(query)}`);
   }
 
   public getFileIcon(fileType: string): string {
