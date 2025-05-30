@@ -38,7 +38,7 @@ export class FileService {
     return this.getFolderContents(folderId).pipe(
       map(content => {
         if (!content.files) return [];
-        return content.files.map(file => {
+        return content.files.map((file: ApiFile) => {
           // Handle null folder_id safely
           const path = file.folder_id ? this.getFolderPath(file.folder_id) : '/';
           return mapApiFileToFileItem(file, path);
@@ -61,11 +61,12 @@ export class FileService {
     );
   }
   
-  public uploadFile(file: Blob, folderId: string = 'root'): Observable<HttpEvent<any>> {
+  public uploadFile(file: Blob, folderId: string): Observable<HttpEvent<any>> {
     const formData = new FormData();
     const fileName = file instanceof File ? file.name : 'file';
     formData.append('file', file, fileName);
-    formData.append('folder_id', folderId);
+    formData.append('parent_id', folderId);
+    console.log(`Uploading file: ${fileName} to folder IDDDD: ${formData.get('parent_id')}`);
     
     // Get the authentication token
     const token = this.authService.getToken();
@@ -115,7 +116,7 @@ export class FileService {
   }
   
   // Folder Operations
-  public getFolderContents(folderId: string = 'root'): Observable<FolderContent> {
+  public getFolderContents(folderId: string = 'root'): Observable<any> {
     console.log(`Fetching folder contents for folder ID: ${folderId}`);
     console.log(`Using API URL: ${this.API_URL}/folders/${folderId}/contents/`);
     
@@ -152,24 +153,8 @@ export class FileService {
         console.log('Response status:', response.status);
         console.log('Response headers:', response.headers);
         
-        const content = response.body as FolderContent;
-        console.log('API response body:', JSON.stringify(content, null, 2));
-        console.log('Files array:', content?.files || []);
-        console.log('Folders array:', content?.folders || []);
-        
-        // Create a default response if the API returns an empty or invalid response
-        if (!content || (!content.files && !content.folders)) {
-          console.warn('API returned empty or invalid response, creating default response');
-          return { files: [], folders: [] } as FolderContent;
-        }
-        
-        // Update folder paths for all subfolders
-        if (content && content.folders) {
-          content.folders.forEach(folder => {
-            const path = this.buildFolderPath(folder);
-            this.updateFolderPath(folder._id, path);
-          });
-        }
+        const content = response.body;
+        console.log('API response body:', JSON.parse(content) as {"files": any[], "folders": any[]});
         
         return content;
       }),

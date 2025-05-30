@@ -5,6 +5,8 @@ import { HttpEventType, HttpHeaders } from '@angular/common/http';
 import { FileService } from '../../../core/services/file.service';
 import { FileItem, FolderItem, mapApiFileToFileItem, mapApiFolderToFolderItem } from '../../../core/models/file.model';
 import { Subscription } from 'rxjs';
+import { File } from '../../../core/models/api.model';
+import { Folder } from '../../../core/models/api.model';
 
 @Component({
   selector: 'app-file-manager',
@@ -153,27 +155,18 @@ export class FileManagerComponent implements OnInit, OnDestroy {
         console.log('Files array:', content.files);
         console.log('Folders array:', content.folders);
         
+        var parsedContent = JSON.parse(content) as { files: any[], folders: any[] };
+        console.log('Parsed contentttt:', parsedContent);
         try {
-          if (!content.files || content.files.length === 0) {
-            console.log('No files returned from API, adding test files');
-            addTestFiles();
-            return;
-          }
+          // if (!parsedContent.files || parsedContent.files.length === 0) {
+          //   console.log('No files returned from API, adding test files');
+          //   addTestFiles();
+          //   return;
+          // }
           
           // Use the mapper functions to convert API models to UI models
-          this.files = content.files.map(file => {
-            console.log('Processing file:', file);
-            const result = mapApiFileToFileItem(file, file.folder_id ? `/folders/${file.folder_id}` : '/');
-            console.log('Mapped to FileItem:', result);
-            return result;
-          });
-          
-          this.folders = content.folders ? content.folders.map(folder => {
-            console.log('Processing folder:', folder);
-            const result = mapApiFolderToFolderItem(folder, folder.path || '/');
-            console.log('Mapped to FolderItem:', result);
-            return result;
-          }) : [];
+          this.files = parsedContent.files;
+          this.folders = parsedContent.folders;
           
           console.log('Final files array:', this.files);
           console.log('Final folders array:', this.folders);
@@ -282,7 +275,6 @@ export class FileManagerComponent implements OnInit, OnDestroy {
     
     const file = input.files[0];
     const folderId = this.currentFolder ? this.currentFolder.id : 'root';
-    
     this.fileService.uploadFile(file, folderId).subscribe({
       next: (event) => {
         if (event.type === HttpEventType.Response) {

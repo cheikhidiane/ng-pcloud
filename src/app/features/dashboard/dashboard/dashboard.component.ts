@@ -160,7 +160,7 @@ export class DashboardComponent implements OnInit {
     // For simplicity, we'll just upload the first file
     const file = files[0];
     
-    this.fileService.uploadFile(file).subscribe({
+    this.fileService.uploadFile(file, 'root').subscribe({
       next: (event) => {
         if (event.type === HttpEventType.UploadProgress && event.total) {
           this.uploadProgress = Math.round(100 * event.loaded / event.total);
